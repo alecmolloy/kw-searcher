@@ -1,7 +1,6 @@
 var kwAPISearcher = function (config) {
     // Instantiate properties
-    this.baseURL = 'http://api-staging.kano.me/'; // Only supports shares
-    this.type = config.type; // Only supports shares
+    this.baseURL = 'http://api.kano.me/share'; // Only supports shares
     this.query = config.query;
     this.appName = config.appName;
     this.output;
@@ -18,34 +17,23 @@ var kwAPISearcher = function (config) {
 
     // Make initial request
     $.ajax({
-        url: this.baseURL + this.type,
-        success: storePages.bind(this),
+        url: this.baseURL,
+        success: this.printData.bind(this),
         data: {
-            app_name: this.appName
+            app_name: this.appName,
+            page: '0',
+            limit: 'none'
         }
     });
 
 }
 
-kwAPISearcher.prototype.getData = function (self) {
-    for (var i = 0; i < self.pages; i++) {
-        var response = $.ajax({
-            url: self.baseURL + self.type,
-            data: {
-                page: i,
-                app_name: this.appName
-            },
-            success: kwAPISearcher.prototype.printData.bind(this)
-        });
-    }
-}
-
 kwAPISearcher.prototype.printData = function (response) {
-    for (var j = 0; j < response.entries.length; j++) {
+    for (var j = 0; j < response.total; j++) {
+        console.log(response.total);
         var entry = response.entries[j];
         var title = entry.title.toLowerCase();
         var description = entry.description.toLowerCase();
-        console.log(description); // + ', ' + this.query);
         if (title.includes(this.query) || description.includes(this.query)) {
             var link = document.createElement('a');
             link.className = 'box';
@@ -53,13 +41,14 @@ kwAPISearcher.prototype.printData = function (response) {
 
             var div = document.createElement('div');
 
-            var text = document.createTextNode(entry.title);
+            var text = document.createTextNode(title);
             var textDiv = document.createElement('div');
             textDiv.className = 'textBox';
 
             var image = document.createElement('img');
             image.src = response.entries[j].cover_url;
             image.className = 'imageBox';
+            image.title = description;
 
             textDiv.appendChild(text);
             div.appendChild(textDiv);
@@ -68,9 +57,10 @@ kwAPISearcher.prototype.printData = function (response) {
             list.appendChild(link);
             this.total++;
         }
-        var sharesS = this.total > 1 ? ' shares' : ' share';
-        this.shareNumber.innerHTML = this.total + sharesS;
     }
+    var sharesS = this.total > 1 ? ' shares' : ' share';
+    this.shareNumber.innerHTML = this.total + sharesS;
+    document.getElementById('spinner').style.display = 'none';
 }
 
 kwAPISearcher.prototype.clearResults = function () {
@@ -84,11 +74,18 @@ kwAPISearcher.prototype.clearResults = function () {
 var searcher;
 
 function submitQuery(e) {
-    searcher = new kwAPISearcher({
-        type: 'share',
-        query: document.getElementById('queryField').value,
-        appName: 'kano-draw'
-    });
+    document.getElementById('spinner').style.display = 'block';
+    console.log(document.getElementById('appSelector').value);
+    if (document.getElementById('appSelector').value === 'all') {
+        searcher = new kwAPISearcher({
+            query: document.getElementById('queryField').value
+        });
+    } else {
+        searcher = new kwAPISearcher({
+            query: document.getElementById('queryField').value,
+            appName: document.getElementById('appSelector').value
+        });
+    }
     searcher.clearResults();
     e.preventDefault();
 }

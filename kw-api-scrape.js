@@ -35,6 +35,7 @@ kwAPISearcher.prototype.printData = function (response) {
         var title = entry.title.toLowerCase();
         var description = entry.description.toLowerCase();
         if (title.includes(this.query) || description.includes(this.query)) {
+            console.log(response);
             var link = document.createElement('a');
             link.className = 'box';
             link.href = 'http://world.kano.me/shared/' + entry.id;
@@ -46,7 +47,11 @@ kwAPISearcher.prototype.printData = function (response) {
             textDiv.className = 'textBox';
 
             var image = document.createElement('img');
-            image.src = response.entries[j].cover_url;
+            if (response.entries[j].cover_url) {
+                image.src = response.entries[j].cover_url;
+            } else {
+                image.src = 'http://world.kano.me/assets/icons/placeholders/' + response.entries[j].app + '@2x.png';
+            }
             image.className = 'imageBox';
             image.title = description;
 

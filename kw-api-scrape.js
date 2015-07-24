@@ -29,13 +29,14 @@ var kwAPISearcher = function (config) {
 }
 
 kwAPISearcher.prototype.printData = function (response) {
+    document.getElementById('spinner').style.display = 'none';
     for (var j = 0; j < response.total; j++) {
-        console.log(response.total);
         var entry = response.entries[j];
         var title = entry.title.toLowerCase();
         var description = entry.description.toLowerCase();
-        if (title.includes(this.query) || description.includes(this.query)) {
-            console.log(response);
+        var userName = entry.user.username.toLowerCase();
+        console.log(entry.user.username)
+        if (title.includes(this.query) || description.includes(this.query) || userName.includes(this.query)) {
             var link = document.createElement('a');
             link.className = 'box';
             link.href = 'http://world.kano.me/shared/' + entry.id;
@@ -65,7 +66,6 @@ kwAPISearcher.prototype.printData = function (response) {
     }
     var sharesS = this.total > 1 ? ' shares' : ' share';
     this.shareNumber.innerHTML = this.total + sharesS;
-    document.getElementById('spinner').style.display = 'none';
 }
 
 kwAPISearcher.prototype.clearResults = function () {
@@ -80,7 +80,6 @@ var searcher;
 
 function submitQuery(e) {
     document.getElementById('spinner').style.display = 'block';
-    console.log(document.getElementById('appSelector').value);
     if (document.getElementById('appSelector').value === 'all') {
         searcher = new kwAPISearcher({
             query: document.getElementById('queryField').value
